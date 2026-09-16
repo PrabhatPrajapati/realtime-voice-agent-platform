@@ -1,5 +1,5 @@
-import { campaignService } from '../services/campaign.service.js';
-import { weeklyCheckinService } from '../services/weekly-checkin.service.js';
+import { campaignService } from '../services/campaignService.js';
+import { weeklyCheckinService } from '../services/weeklyCheckinService.js';
 
 export class CampaignController {
   async listCampaigns(req, res, next) {

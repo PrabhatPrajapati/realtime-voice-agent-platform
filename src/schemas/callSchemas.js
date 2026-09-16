@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { phoneRegex } from './customer.schemas.js';
+import { phoneRegex } from './customerSchemas.js';
 
 export const initiateTestCallSchema = z.object({
   phone: z.string().regex(phoneRegex, 'Phone number must be valid E.164 format (e.g. +1234567890)').optional(),

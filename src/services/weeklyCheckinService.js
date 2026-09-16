@@ -1,5 +1,5 @@
 import { prisma } from '../utils/prisma.js';
-import { campaignService } from './campaign.service.js';
+import { campaignService } from './campaignService.js';
 import { env } from '../config/env.js';
 import { logger } from '../config/logger.js';
 

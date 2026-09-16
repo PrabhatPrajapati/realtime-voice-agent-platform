@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { customerController } from '../controllers/customer.controller.js';
+import { customerController } from '../controllers/customerController.js';
 import { validate } from '../middleware/validate.js';
 import {
   createCustomerSchema,
   customerIdParamSchema,
   customerQuerySchema,
-} from '../schemas/customer.schemas.js';
+} from '../schemas/customerSchemas.js';
 
 const router = Router();
 

@@ -1,6 +1,6 @@
-import { OpenAIRealtimeSession } from '../services/openai-realtime.service.js';
+import { OpenAIRealtimeSession } from '../services/openaiRealtimeService.js';
 import { logger, createCallLogger } from '../config/logger.js';
-import { callRepository } from '../repositories/call.repository.js';
+import { callRepository } from '../repositories/callRepository.js';
 
 /**
  * Handles Twilio Media Stream WebSocket connections

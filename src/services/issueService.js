@@ -1,6 +1,6 @@
-import { issueRepository } from '../repositories/issue.repository.js';
-import { customerRepository } from '../repositories/customer.repository.js';
-import { callRepository } from '../repositories/call.repository.js';
+import { issueRepository } from '../repositories/issueRepository.js';
+import { customerRepository } from '../repositories/customerRepository.js';
+import { callRepository } from '../repositories/callRepository.js';
 import { logger } from '../config/logger.js';
 
 export class IssueService {

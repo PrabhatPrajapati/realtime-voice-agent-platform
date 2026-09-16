@@ -1,5 +1,5 @@
-import { callService } from '../services/call.service.js';
-import { twimlBuilder } from '../utils/twiml-builder.js';
+import { callService } from '../services/callService.js';
+import { twimlBuilder } from '../utils/twimlBuilder.js';
 import { env } from '../config/env.js';
 import { logger } from '../config/logger.js';
 

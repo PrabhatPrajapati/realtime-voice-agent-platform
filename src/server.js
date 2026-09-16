@@ -4,9 +4,9 @@ import app from './app.js';
 import { env } from './config/env.js';
 import { logger } from './config/logger.js';
 import { prisma } from './utils/prisma.js';
-import { handleMediaStreamConnection } from './websocket/media-stream.handler.js';
-import { campaignWorker } from './workers/campaign.worker.js';
-import { weeklyCheckinService } from './services/weekly-checkin.service.js';
+import { handleMediaStreamConnection } from './websocket/mediaStreamHandler.js';
+import { campaignWorker } from './workers/campaignWorker.js';
+import { weeklyCheckinService } from './services/weeklyCheckinService.js';
 
 const server = http.createServer(app);
 

@@ -2,11 +2,11 @@ import { Worker } from 'bullmq';
 import Redis from 'ioredis';
 import { env } from '../config/env.js';
 import { logger, createCallLogger } from '../config/logger.js';
-import { CAMPAIGN_QUEUE_NAME } from '../queues/campaign.queue.js';
-import { campaignRepository } from '../repositories/campaign.repository.js';
-import { customerRepository } from '../repositories/customer.repository.js';
-import { callRepository } from '../repositories/call.repository.js';
-import { twilioService } from '../services/twilio.service.js';
+import { CAMPAIGN_QUEUE_NAME } from '../queues/campaignQueue.js';
+import { campaignRepository } from '../repositories/campaignRepository.js';
+import { customerRepository } from '../repositories/customerRepository.js';
+import { callRepository } from '../repositories/callRepository.js';
+import { twilioService } from '../services/twilioService.js';
 
 const redisConnection = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: null,

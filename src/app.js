@@ -1,10 +1,10 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
-import { requestLogger } from './middleware/request-logger.js';
-import { errorHandler } from './middleware/error-handler.js';
+import { requestLogger } from './middleware/requestLogger.js';
+import { errorHandler } from './middleware/errorHandler.js';
 import apiRoutes from './routes/index.js';
-import twilioWebhookRoutes from './routes/twilio-webhook.routes.js';
+import twilioWebhookRoutes from './routes/twilioWebhookRoutes.js';
 
 const app = express();
 

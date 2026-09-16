@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { issueController } from '../controllers/issue.controller.js';
+import { issueController } from '../controllers/issueController.js';
 import { validate } from '../middleware/validate.js';
 import {
   createIssueSchema,
   issueQuerySchema,
   resolveIssueSchema,
-} from '../schemas/issue.schemas.js';
+} from '../schemas/issueSchemas.js';
 
 const router = Router();
 

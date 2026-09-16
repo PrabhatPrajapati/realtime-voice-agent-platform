@@ -1,4 +1,4 @@
-import { customerService } from '../services/customer.service.js';
+import { customerService } from '../services/customerService.js';
 
 export class CustomerController {
   async createCustomer(req, res, next) {

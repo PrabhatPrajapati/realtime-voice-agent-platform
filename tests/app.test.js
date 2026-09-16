@@ -1,10 +1,10 @@
 import request from 'supertest';
 import { jest } from '@jest/globals';
 import app from '../src/app.js';
-import { callRepository } from '../src/repositories/call.repository.js';
-import { customerRepository } from '../src/repositories/customer.repository.js';
-import { campaignRepository } from '../src/repositories/campaign.repository.js';
-import { issueRepository } from '../src/repositories/issue.repository.js';
+import { callRepository } from '../src/repositories/callRepository.js';
+import { customerRepository } from '../src/repositories/customerRepository.js';
+import { campaignRepository } from '../src/repositories/campaignRepository.js';
+import { issueRepository } from '../src/repositories/issueRepository.js';
 
 describe('AI Calling Agent Comprehensive Integration & Unit Tests', () => {
   beforeAll(() => {

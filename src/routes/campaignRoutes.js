@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { campaignController } from '../controllers/campaign.controller.js';
+import { campaignController } from '../controllers/campaignController.js';
 import { validate } from '../middleware/validate.js';
 import {
   createCampaignSchema,
   campaignQuerySchema,
   campaignIdParamSchema,
-} from '../schemas/campaign.schemas.js';
+} from '../schemas/campaignSchemas.js';
 
 const router = Router();
 

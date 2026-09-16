@@ -2,11 +2,11 @@ import WebSocket from 'ws';
 import { env } from '../config/env.js';
 import { logger, createCallLogger } from '../config/logger.js';
 import { realtimeTools } from '../ai/tools.js';
-import { buildSystemPrompt } from '../prompts/agent.prompts.js';
-import { callRepository } from '../repositories/call.repository.js';
-import { customerRepository } from '../repositories/customer.repository.js';
-import { issueService } from './issue.service.js';
-import { twilioService } from './twilio.service.js';
+import { buildSystemPrompt } from '../prompts/agentPrompts.js';
+import { callRepository } from '../repositories/callRepository.js';
+import { customerRepository } from '../repositories/customerRepository.js';
+import { issueService } from './issueService.js';
+import { twilioService } from './twilioService.js';
 
 export class OpenAIRealtimeSession {
   /**

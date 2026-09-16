@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import customerRoutes from './customer.routes.js';
-import callRoutes from './call.routes.js';
-import campaignRoutes from './campaign.routes.js';
-import issueRoutes from './issue.routes.js';
+import customerRoutes from './customerRoutes.js';
+import callRoutes from './callRoutes.js';
+import campaignRoutes from './campaignRoutes.js';
+import issueRoutes from './issueRoutes.js';
 import { prisma } from '../utils/prisma.js';
 
 const router = Router();

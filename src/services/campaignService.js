@@ -1,5 +1,5 @@
-import { campaignRepository } from '../repositories/campaign.repository.js';
-import { campaignQueue } from '../queues/campaign.queue.js';
+import { campaignRepository } from '../repositories/campaignRepository.js';
+import { campaignQueue } from '../queues/campaignQueue.js';
 import { logger } from '../config/logger.js';
 
 export class CampaignService {

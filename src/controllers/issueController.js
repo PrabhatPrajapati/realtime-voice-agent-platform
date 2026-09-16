@@ -1,4 +1,4 @@
-import { issueService } from '../services/issue.service.js';
+import { issueService } from '../services/issueService.js';
 
 export class IssueController {
   async listIssues(req, res, next) {

@@ -1,4 +1,4 @@
-import { callService } from '../services/call.service.js';
+import { callService } from '../services/callService.js';
 
 export class CallController {
   /**

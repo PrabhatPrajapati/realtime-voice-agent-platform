@@ -1,4 +1,4 @@
-import { customerRepository } from '../repositories/customer.repository.js';
+import { customerRepository } from '../repositories/customerRepository.js';
 import { logger } from '../config/logger.js';
 
 export class CustomerService {

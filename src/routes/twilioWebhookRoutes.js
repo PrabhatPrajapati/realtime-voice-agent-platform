@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { twilioWebhookController } from '../controllers/twilio-webhook.controller.js';
-import { verifyTwilioWebhook } from '../middleware/twilio-auth.js';
+import { twilioWebhookController } from '../controllers/twilioWebhookController.js';
+import { verifyTwilioWebhook } from '../middleware/twilioAuth.js';
 
 const router = Router();
 

@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { callController } from '../controllers/call.controller.js';
+import { callController } from '../controllers/callController.js';
 import { validate } from '../middleware/validate.js';
 import {
   initiateTestCallSchema,
   callIdParamSchema,
   callQuerySchema,
-} from '../schemas/call.schemas.js';
+} from '../schemas/callSchemas.js';
 
 const router = Router();
 

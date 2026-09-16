@@ -1,6 +1,6 @@
-import { callRepository } from '../repositories/call.repository.js';
-import { customerRepository } from '../repositories/customer.repository.js';
-import { twilioService } from './twilio.service.js';
+import { callRepository } from '../repositories/callRepository.js';
+import { customerRepository } from '../repositories/customerRepository.js';
+import { twilioService } from './twilioService.js';
 import { logger, createCallLogger } from '../config/logger.js';
 
 export class CallService {
