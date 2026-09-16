@@ -1,41 +1,27 @@
 import { issueService } from '../services/issueService.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { ApiResponse } from '../utils/apiResponse.js';
 
 export class IssueController {
-  async listIssues(req, res, next) {
-    try {
-      const result = await issueService.listIssues(req.query);
-      res.json({ success: true, ...result });
-    } catch (error) {
-      next(error);
-    }
-  }
+  listIssues = asyncHandler(async (req, res) => {
+    const result = await issueService.listIssues(req.query);
+    return ApiResponse.paginated(res, result);
+  });
 
-  async getIssue(req, res, next) {
-    try {
-      const issue = await issueService.getIssueById(req.params.id);
-      res.json({ success: true, data: issue });
-    } catch (error) {
-      next(error);
-    }
-  }
+  getIssue = asyncHandler(async (req, res) => {
+    const issue = await issueService.getIssueById(req.params.id);
+    return ApiResponse.success(res, issue);
+  });
 
-  async createIssue(req, res, next) {
-    try {
-      const issue = await issueService.createIssue(req.body);
-      res.status(201).json({ success: true, data: issue });
-    } catch (error) {
-      next(error);
-    }
-  }
+  createIssue = asyncHandler(async (req, res) => {
+    const issue = await issueService.createIssue(req.body);
+    return ApiResponse.created(res, issue);
+  });
 
-  async resolveIssue(req, res, next) {
-    try {
-      const issue = await issueService.resolveIssue(req.params.id, req.body);
-      res.json({ success: true, data: issue });
-    } catch (error) {
-      next(error);
-    }
-  }
+  resolveIssue = asyncHandler(async (req, res) => {
+    const issue = await issueService.resolveIssue(req.params.id, req.body);
+    return ApiResponse.success(res, issue);
+  });
 }
 
 export const issueController = new IssueController();

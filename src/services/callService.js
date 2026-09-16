@@ -2,6 +2,7 @@ import { callRepository } from '../repositories/callRepository.js';
 import { customerRepository } from '../repositories/customerRepository.js';
 import { twilioService } from './twilioService.js';
 import { logger, createCallLogger } from '../config/logger.js';
+import { CALL_STATUS, CALL_OUTCOME, CUSTOMER_STATUS } from '../constants/enums.js';
 
 export class CallService {
   /**
@@ -29,7 +30,7 @@ export class CallService {
     }
 
     // Compliance Check: Do-Not-Call check
-    if (customer.status === 'DO_NOT_CALL') {
+    if (customer.status === CUSTOMER_STATUS.DO_NOT_CALL) {
       const error = new Error(`Cannot place call: Customer ${customer.phone} is registered on DO_NOT_CALL list`);
       error.statusCode = 400;
       throw error;
@@ -38,8 +39,8 @@ export class CallService {
     // Step 1: Create Initial Call Record
     const initialCall = await callRepository.create({
       customerId: customer.id,
-      status: 'QUEUED',
-      outcome: 'IN_PROGRESS',
+      status: CALL_STATUS.QUEUED,
+      outcome: CALL_OUTCOME.IN_PROGRESS,
       startedAt: new Date(),
     });
 
@@ -62,7 +63,7 @@ export class CallService {
       // Step 3: Update Call with Twilio SID and DIALING status
       const updatedCall = await callRepository.update(initialCall.id, {
         twilioCallSid: twilioResult.callSid,
-        status: 'DIALING',
+        status: CALL_STATUS.DIALING,
       });
 
       await callRepository.addMessage({
@@ -78,8 +79,8 @@ export class CallService {
       callLog.error({ err: error.message }, 'Failed to initiate outbound Twilio call');
 
       await callRepository.update(initialCall.id, {
-        status: 'FAILED',
-        outcome: 'FAILED',
+        status: CALL_STATUS.FAILED,
+        outcome: CALL_OUTCOME.FAILED,
         endedAt: new Date(),
       });
 
@@ -98,7 +99,7 @@ export class CallService {
    * @param {Object} statusData - Twilio webhook payload
    */
   async handleTwilioStatusCallback(statusData) {
-    const { CallSid, CallStatus: twilioStatus, CallDuration, SequenceNumber } = statusData;
+    const { CallSid, CallStatus: twilioStatus, CallDuration } = statusData;
 
     logger.info({ CallSid, twilioStatus, CallDuration }, 'Received Twilio status callback');
 
@@ -115,38 +116,38 @@ export class CallService {
       switch (twilioStatus) {
         case 'initiated':
         case 'queued':
-          updateData.status = 'QUEUED';
+          updateData.status = CALL_STATUS.QUEUED;
           break;
         case 'ringing':
-          updateData.status = 'RINGING';
+          updateData.status = CALL_STATUS.RINGING;
           break;
         case 'in-progress':
           if (!existingCall.answeredAt) {
             updateData.answeredAt = now;
           }
-          updateData.status = 'ANSWERED';
+          updateData.status = CALL_STATUS.ANSWERED;
           break;
         case 'completed':
-          updateData.status = 'COMPLETED';
+          updateData.status = CALL_STATUS.COMPLETED;
           updateData.endedAt = now;
           if (CallDuration) {
             updateData.duration = parseInt(CallDuration, 10);
           }
           break;
         case 'busy':
-          updateData.status = 'FAILED';
-          updateData.outcome = 'BUSY';
+          updateData.status = CALL_STATUS.FAILED;
+          updateData.outcome = CALL_OUTCOME.BUSY;
           updateData.endedAt = now;
           break;
         case 'no-answer':
-          updateData.status = 'FAILED';
-          updateData.outcome = 'NO_ANSWER';
+          updateData.status = CALL_STATUS.FAILED;
+          updateData.outcome = CALL_OUTCOME.NO_ANSWER;
           updateData.endedAt = now;
           break;
         case 'failed':
         case 'canceled':
-          updateData.status = 'FAILED';
-          updateData.outcome = 'FAILED';
+          updateData.status = CALL_STATUS.FAILED;
+          updateData.outcome = CALL_OUTCOME.FAILED;
           updateData.endedAt = now;
           break;
         default:
@@ -179,7 +180,7 @@ export class CallService {
       amdResult = 'HUMAN';
     } else if (AnsweredBy && AnsweredBy.startsWith('machine')) {
       amdResult = 'MACHINE';
-      outcome = 'VOICEMAIL';
+      outcome = CALL_OUTCOME.VOICEMAIL;
     }
 
     return callRepository.update(existingCall.id, {

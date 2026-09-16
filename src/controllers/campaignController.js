@@ -1,90 +1,56 @@
 import { campaignService } from '../services/campaignService.js';
 import { weeklyCheckinService } from '../services/weeklyCheckinService.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { ApiResponse } from '../utils/apiResponse.js';
 
 export class CampaignController {
-  async listCampaigns(req, res, next) {
-    try {
-      const result = await campaignService.listCampaigns(req.query);
-      res.json({ success: true, ...result });
-    } catch (error) {
-      next(error);
-    }
-  }
+  listCampaigns = asyncHandler(async (req, res) => {
+    const result = await campaignService.listCampaigns(req.query);
+    return ApiResponse.paginated(res, result);
+  });
 
-  async getWeeklyStatus(req, res, next) {
-    try {
-      const status = await weeklyCheckinService.getStatus();
-      res.json({ success: true, data: status });
-    } catch (error) {
-      next(error);
-    }
-  }
+  getWeeklyStatus = asyncHandler(async (req, res) => {
+    const status = await weeklyCheckinService.getStatus();
+    return ApiResponse.success(res, status);
+  });
 
-  async triggerWeekly(req, res, next) {
-    try {
-      const result = await weeklyCheckinService.triggerWeeklyCheckIn({
-        name: req.body?.name,
-        triggeredBy: 'MANUAL_DASHBOARD',
-      });
-      res.json({ success: true, data: result });
-    } catch (error) {
-      next(error);
-    }
-  }
+  triggerWeekly = asyncHandler(async (req, res) => {
+    const result = await weeklyCheckinService.triggerWeeklyCheckIn({
+      name: req.body?.name,
+      triggeredBy: 'MANUAL_DASHBOARD',
+    });
+    return ApiResponse.success(res, result);
+  });
 
-  async getCampaign(req, res, next) {
-    try {
-      const campaign = await campaignService.getCampaignById(req.params.id);
-      res.json({ success: true, data: campaign });
-    } catch (error) {
-      next(error);
-    }
-  }
+  getCampaign = asyncHandler(async (req, res) => {
+    const campaign = await campaignService.getCampaignById(req.params.id);
+    return ApiResponse.success(res, campaign);
+  });
 
-  async createCampaign(req, res, next) {
-    try {
-      const campaign = await campaignService.createCampaign(req.body);
-      res.status(201).json({ success: true, data: campaign });
-    } catch (error) {
-      next(error);
-    }
-  }
+  createCampaign = asyncHandler(async (req, res) => {
+    const campaign = await campaignService.createCampaign(req.body);
+    return ApiResponse.created(res, campaign);
+  });
 
-  async startCampaign(req, res, next) {
-    try {
-      const campaign = await campaignService.startCampaign(req.params.id);
-      res.json({ success: true, data: campaign });
-    } catch (error) {
-      next(error);
-    }
-  }
+  startCampaign = asyncHandler(async (req, res) => {
+    const campaign = await campaignService.startCampaign(req.params.id);
+    return ApiResponse.success(res, campaign);
+  });
 
-  async pauseCampaign(req, res, next) {
-    try {
-      const campaign = await campaignService.pauseCampaign(req.params.id);
-      res.json({ success: true, data: campaign });
-    } catch (error) {
-      next(error);
-    }
-  }
+  pauseCampaign = asyncHandler(async (req, res) => {
+    const campaign = await campaignService.pauseCampaign(req.params.id);
+    return ApiResponse.success(res, campaign);
+  });
 
-  async resumeCampaign(req, res, next) {
-    try {
-      const campaign = await campaignService.resumeCampaign(req.params.id);
-      res.json({ success: true, data: campaign });
-    } catch (error) {
-      next(error);
-    }
-  }
+  resumeCampaign = asyncHandler(async (req, res) => {
+    const campaign = await campaignService.resumeCampaign(req.params.id);
+    return ApiResponse.success(res, campaign);
+  });
 
-  async cancelCampaign(req, res, next) {
-    try {
-      const campaign = await campaignService.cancelCampaign(req.params.id);
-      res.json({ success: true, data: campaign });
-    } catch (error) {
-      next(error);
-    }
-  }
+  cancelCampaign = asyncHandler(async (req, res) => {
+    const campaign = await campaignService.cancelCampaign(req.params.id);
+    return ApiResponse.success(res, campaign);
+  });
 }
 
 export const campaignController = new CampaignController();

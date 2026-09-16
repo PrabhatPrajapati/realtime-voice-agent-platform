@@ -2,6 +2,12 @@ import { issueRepository } from '../repositories/issueRepository.js';
 import { customerRepository } from '../repositories/customerRepository.js';
 import { callRepository } from '../repositories/callRepository.js';
 import { logger } from '../config/logger.js';
+import {
+  ISSUE_CATEGORY,
+  ISSUE_PRIORITY,
+  ISSUE_STATUS,
+  CALL_OUTCOME,
+} from '../constants/enums.js';
 
 export class IssueService {
   /**
@@ -12,9 +18,9 @@ export class IssueService {
     customerId,
     assignedCsrId,
     summary,
-    category = 'OTHER',
-    priority = 'MEDIUM',
-    status = 'OPEN',
+    category = ISSUE_CATEGORY.OTHER,
+    priority = ISSUE_PRIORITY.MEDIUM,
+    status = ISSUE_STATUS.OPEN,
   }) {
     logger.info({ callId, customerId, category, priority }, 'Saving structured issue');
 
@@ -53,7 +59,7 @@ export class IssueService {
     // Update call outcome to ISSUE_FOUND if callId provided
     if (callId) {
       await callRepository.update(callId, {
-        outcome: 'ISSUE_FOUND',
+        outcome: CALL_OUTCOME.ISSUE_FOUND,
       });
     }
 
@@ -79,7 +85,7 @@ export class IssueService {
   async resolveIssue(id, { notes } = {}) {
     const issue = await this.getIssueById(id);
     return issueRepository.update(issue.id, {
-      status: 'RESOLVED',
+      status: ISSUE_STATUS.RESOLVED,
     });
   }
 

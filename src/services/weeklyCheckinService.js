@@ -2,6 +2,7 @@ import { prisma } from '../utils/prisma.js';
 import { campaignService } from './campaignService.js';
 import { env } from '../config/env.js';
 import { logger } from '../config/logger.js';
+import { CUSTOMER_STATUS } from '../constants/enums.js';
 
 export class WeeklyCheckinService {
   constructor() {
@@ -23,7 +24,7 @@ export class WeeklyCheckinService {
     // 1. Fetch all ACTIVE customers (ignore DO_NOT_CALL or INACTIVE)
     const activeCustomers = await prisma.customer.findMany({
       where: {
-        status: 'ACTIVE',
+        status: CUSTOMER_STATUS.ACTIVE,
       },
     });
 
@@ -142,7 +143,7 @@ export class WeeklyCheckinService {
    */
   async getStatus() {
     const activeCount = await prisma.customer.count({
-      where: { status: 'ACTIVE' },
+      where: { status: CUSTOMER_STATUS.ACTIVE },
     });
 
     return {

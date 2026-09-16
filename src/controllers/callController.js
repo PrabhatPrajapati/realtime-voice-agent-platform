@@ -1,52 +1,32 @@
 import { callService } from '../services/callService.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { ApiResponse } from '../utils/apiResponse.js';
 
 export class CallController {
   /**
    * POST /api/calls/test
    * Accepts: { phone?: string, customerId?: string, customerName?: string }
    */
-  async initiateTestCall(req, res, next) {
-    try {
-      const call = await callService.initiateTestCall(req.body);
-      res.status(201).json({
-        success: true,
-        data: call,
-        message: 'Outbound test call initiated successfully',
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+  initiateTestCall = asyncHandler(async (req, res) => {
+    const call = await callService.initiateTestCall(req.body);
+    return ApiResponse.created(res, call, 'Outbound test call initiated successfully');
+  });
 
   /**
    * GET /api/calls/:id
    */
-  async getCall(req, res, next) {
-    try {
-      const call = await callService.getCallById(req.params.id);
-      res.json({
-        success: true,
-        data: call,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+  getCall = asyncHandler(async (req, res) => {
+    const call = await callService.getCallById(req.params.id);
+    return ApiResponse.success(res, call);
+  });
 
   /**
    * GET /api/calls
    */
-  async listCalls(req, res, next) {
-    try {
-      const result = await callService.listCalls(req.query);
-      res.json({
-        success: true,
-        ...result,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+  listCalls = asyncHandler(async (req, res) => {
+    const result = await callService.listCalls(req.query);
+    return ApiResponse.paginated(res, result);
+  });
 }
 
 export const callController = new CallController();

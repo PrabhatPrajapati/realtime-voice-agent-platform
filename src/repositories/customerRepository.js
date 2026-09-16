@@ -1,4 +1,6 @@
 import { prisma } from '../utils/prisma.js';
+import { getPaginationParams, formatPaginatedResult } from '../utils/pagination.js';
+import { CUSTOMER_STATUS } from '../constants/enums.js';
 
 export class CustomerRepository {
   /**
@@ -39,17 +41,17 @@ export class CustomerRepository {
     return prisma.customer.upsert({
       where: { phone },
       update: {
-        ...(name ? { name } : {}),
-        ...(email ? { email } : {}),
-        ...(assignedCsrId ? { assignedCsrId } : {}),
-        ...(status ? { status } : {}),
+        ...(name && { name }),
+        ...(email && { email }),
+        ...(assignedCsrId && { assignedCsrId }),
+        ...(status && { status }),
       },
       create: {
         phone,
         name: name || 'Valued Customer',
         email,
         assignedCsrId,
-        status: status || 'ACTIVE',
+        status: status || CUSTOMER_STATUS.ACTIVE,
       },
     });
   }
@@ -58,38 +60,31 @@ export class CustomerRepository {
    * List customers with pagination and filtering
    * @param {Object} params
    */
-  async findMany({ page = 1, limit = 20, status, search }) {
-    const skip = (page - 1) * limit;
+  async findMany({ page, limit, status, search } = {}) {
+    const { page: p, limit: l, skip, take } = getPaginationParams({ page, limit });
+
     const where = {
-      ...(status ? { status } : {}),
-      ...(search
-        ? {
-            OR: [
-              { name: { contains: search, mode: 'insensitive' } },
-              { phone: { contains: search } },
-              { email: { contains: search, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
+      ...(status && { status }),
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { phone: { contains: search } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
+      }),
     };
 
     const [items, total] = await Promise.all([
       prisma.customer.findMany({
         where,
         skip,
-        take: limit,
+        take,
         orderBy: { createdAt: 'desc' },
       }),
       prisma.customer.count({ where }),
     ]);
 
-    return {
-      items,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+    return formatPaginatedResult({ items, total, page: p, limit: l });
   }
 
   /**

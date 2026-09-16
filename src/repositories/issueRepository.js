@@ -1,4 +1,5 @@
 import { prisma } from '../utils/prisma.js';
+import { getPaginationParams, formatPaginatedResult } from '../utils/pagination.js';
 
 export class IssueRepository {
   /**
@@ -63,27 +64,28 @@ export class IssueRepository {
    * List issues with filters and pagination
    */
   async findMany({
-    page = 1,
-    limit = 20,
+    page,
+    limit,
     status,
     priority,
     category,
     customerId,
   } = {}) {
-    const skip = (page - 1) * limit;
-    const where = {};
+    const { page: p, limit: l, skip, take } = getPaginationParams({ page, limit });
 
-    if (status) where.status = status;
-    if (priority) where.priority = priority;
-    if (category) where.category = category;
-    if (customerId) where.customerId = customerId;
+    const where = {
+      ...(status && { status }),
+      ...(priority && { priority }),
+      ...(category && { category }),
+      ...(customerId && { customerId }),
+    };
 
     const [total, items] = await Promise.all([
       prisma.issue.count({ where }),
       prisma.issue.findMany({
         where,
         skip,
-        take: limit,
+        take,
         orderBy: { createdAt: 'desc' },
         include: {
           customer: true,
@@ -92,13 +94,7 @@ export class IssueRepository {
       }),
     ]);
 
-    return {
-      items,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+    return formatPaginatedResult({ items, total, page: p, limit: l });
   }
 }
 

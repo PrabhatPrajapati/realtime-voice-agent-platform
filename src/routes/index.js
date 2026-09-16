@@ -4,6 +4,9 @@ import callRoutes from './callRoutes.js';
 import campaignRoutes from './campaignRoutes.js';
 import issueRoutes from './issueRoutes.js';
 import { prisma } from '../utils/prisma.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { ApiResponse } from '../utils/apiResponse.js';
+import { CALL_STATUS, CALL_OUTCOME, ISSUE_STATUS } from '../constants/enums.js';
 
 const router = Router();
 
@@ -18,8 +21,9 @@ router.get('/health', (req, res) => {
 });
 
 // Dashboard Aggregated Stats
-router.get('/stats', async (req, res, next) => {
-  try {
+router.get(
+  '/stats',
+  asyncHandler(async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -37,35 +41,30 @@ router.get('/stats', async (req, res, next) => {
     ] = await Promise.all([
       prisma.customer.count(),
       prisma.call.count({ where: { createdAt: { gte: today } } }),
-      prisma.call.count({ where: { status: 'COMPLETED' } }),
-      prisma.call.count({ where: { outcome: 'NO_ISSUE' } }),
+      prisma.call.count({ where: { status: CALL_STATUS.COMPLETED } }),
+      prisma.call.count({ where: { outcome: CALL_OUTCOME.NO_ISSUE } }),
       prisma.issue.count(),
-      prisma.call.count({ where: { outcome: 'NO_ANSWER' } }),
-      prisma.call.count({ where: { outcome: 'VOICEMAIL' } }),
-      prisma.call.count({ where: { outcome: 'HUMAN_REQUESTED' } }),
-      prisma.call.count({ where: { outcome: 'CALLBACK' } }),
-      prisma.issue.count({ where: { status: 'OPEN' } }),
+      prisma.call.count({ where: { outcome: CALL_OUTCOME.NO_ANSWER } }),
+      prisma.call.count({ where: { outcome: CALL_OUTCOME.VOICEMAIL } }),
+      prisma.call.count({ where: { outcome: CALL_OUTCOME.HUMAN_REQUESTED } }),
+      prisma.call.count({ where: { outcome: CALL_OUTCOME.CALLBACK } }),
+      prisma.issue.count({ where: { status: ISSUE_STATUS.OPEN } }),
     ]);
 
-    res.json({
-      success: true,
-      data: {
-        totalCustomers,
-        callsToday,
-        completedCalls,
-        noIssueCalls,
-        issuesFound,
-        noAnswerCalls,
-        voicemailCalls,
-        humanTransfers,
-        callbacks,
-        openIssues,
-      },
+    return ApiResponse.success(res, {
+      totalCustomers,
+      callsToday,
+      completedCalls,
+      noIssueCalls,
+      issuesFound,
+      noAnswerCalls,
+      voicemailCalls,
+      humanTransfers,
+      callbacks,
+      openIssues,
     });
-  } catch (error) {
-    next(error);
-  }
-});
+  })
+);
 
 // API Resources
 router.use('/customers', customerRoutes);

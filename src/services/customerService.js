@@ -1,5 +1,6 @@
 import { customerRepository } from '../repositories/customerRepository.js';
 import { logger } from '../config/logger.js';
+import { CUSTOMER_STATUS } from '../constants/enums.js';
 
 export class CustomerService {
   async getCustomerById(id) {
@@ -22,7 +23,7 @@ export class CustomerService {
 
   async setDoNotCall(id) {
     logger.info({ customerId: id }, 'Marking customer as DO_NOT_CALL');
-    return customerRepository.updateStatus(id, 'DO_NOT_CALL');
+    return customerRepository.updateStatus(id, CUSTOMER_STATUS.DO_NOT_CALL);
   }
 }
 

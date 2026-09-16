@@ -1,4 +1,6 @@
 import { prisma } from '../utils/prisma.js';
+import { getPaginationParams, formatPaginatedResult } from '../utils/pagination.js';
+import { CAMPAIGN_STATUS, CAMPAIGN_CUSTOMER_STATUS } from '../constants/enums.js';
 
 export class CampaignRepository {
   /**
@@ -12,11 +14,11 @@ export class CampaignRepository {
         concurrency,
         totalCustomers: customerIds.length,
         completedCalls: 0,
-        status: 'DRAFT',
+        status: CAMPAIGN_STATUS.DRAFT,
         campaignCustomers: {
           create: customerIds.map((customerId) => ({
             customerId,
-            status: 'PENDING',
+            status: CAMPAIGN_CUSTOMER_STATUS.PENDING,
           })),
         },
       },
@@ -57,19 +59,18 @@ export class CampaignRepository {
   }
 
   /**
-   * List campaigns
+   * List campaigns with formatted metrics
    */
-  async findMany({ page = 1, limit = 20, status } = {}) {
-    const skip = (page - 1) * limit;
-    const where = {};
-    if (status) where.status = status;
+  async findMany({ page, limit, status } = {}) {
+    const { page: p, limit: l, skip, take } = getPaginationParams({ page, limit });
+    const where = status ? { status } : {};
 
     const [total, items] = await Promise.all([
       prisma.campaign.count({ where }),
       prisma.campaign.findMany({
         where,
         skip,
-        take: limit,
+        take,
         orderBy: { createdAt: 'desc' },
         include: {
           campaignCustomers: {
@@ -79,20 +80,11 @@ export class CampaignRepository {
       }),
     ]);
 
-    // Format metrics summary for each campaign
     const formattedItems = items.map((c) => {
-      const breakdown = {
-        PENDING: 0,
-        QUEUED: 0,
-        CALLING: 0,
-        COMPLETED: 0,
-        FAILED: 0,
-        NO_ANSWER: 0,
-        BUSY: 0,
-        VOICEMAIL: 0,
-        CALLBACK: 0,
-        DO_NOT_CALL: 0,
-      };
+      const breakdown = Object.values(CAMPAIGN_CUSTOMER_STATUS).reduce((acc, curr) => {
+        acc[curr] = 0;
+        return acc;
+      }, {});
 
       c.campaignCustomers.forEach((cc) => {
         if (breakdown[cc.status] !== undefined) {
@@ -110,13 +102,7 @@ export class CampaignRepository {
       };
     });
 
-    return {
-      items: formattedItems,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+    return formatPaginatedResult({ items: formattedItems, total, page: p, limit: l });
   }
 
   /**

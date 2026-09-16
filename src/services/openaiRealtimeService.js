@@ -7,6 +7,13 @@ import { callRepository } from '../repositories/callRepository.js';
 import { customerRepository } from '../repositories/customerRepository.js';
 import { issueService } from './issueService.js';
 import { twilioService } from './twilioService.js';
+import {
+  CALL_STATUS,
+  CALL_OUTCOME,
+  CUSTOMER_STATUS,
+  ISSUE_CATEGORY,
+  ISSUE_PRIORITY,
+} from '../constants/enums.js';
 
 export class OpenAIRealtimeSession {
   /**
@@ -168,7 +175,7 @@ export class OpenAIRealtimeSession {
     // Update call status to AI_CONNECTED
     if (this.callId) {
       await callRepository.update(this.callId, {
-        status: 'AI_CONNECTED',
+        status: CALL_STATUS.AI_CONNECTED,
       });
       await this.logMessage('SYSTEM', 'AI connected to voice stream');
     }
@@ -294,13 +301,13 @@ export class OpenAIRealtimeSession {
             customerId: this.customerId || this.customer?.id,
             assignedCsrId: this.customer?.assignedCsrId || 'CSR-001',
             summary: args.summary || 'Customer reported an issue',
-            category: args.category || 'OTHER',
-            priority: args.priority || 'MEDIUM',
+            category: args.category || ISSUE_CATEGORY.OTHER,
+            priority: args.priority || ISSUE_PRIORITY.MEDIUM,
           });
           result = { success: true, issueId: issue.id, message: 'Issue saved to database' };
           await this.logMessage(
             'SYSTEM',
-            `Issue logged: [${args.category} - ${args.priority}] ${args.summary}`
+            `Issue logged: [${args.category || 'OTHER'} - ${args.priority || 'MEDIUM'}] ${args.summary}`
           );
           break;
         }
@@ -312,8 +319,10 @@ export class OpenAIRealtimeSession {
           // Update call status
           if (this.callId) {
             await callRepository.update(this.callId, {
-              status: 'TRANSFERRED',
-              outcome: args.reason?.includes('human') ? 'HUMAN_REQUESTED' : 'ISSUE_FOUND',
+              status: CALL_STATUS.TRANSFERRED,
+              outcome: args.reason?.includes('human')
+                ? CALL_OUTCOME.HUMAN_REQUESTED
+                : CALL_OUTCOME.ISSUE_FOUND,
             });
           }
 
@@ -330,7 +339,7 @@ export class OpenAIRealtimeSession {
         case 'request_callback': {
           if (this.callId) {
             await callRepository.update(this.callId, {
-              outcome: 'CALLBACK',
+              outcome: CALL_OUTCOME.CALLBACK,
             });
           }
           await this.logMessage('SYSTEM', `Callback requested for: ${args.preferredTime || 'ASAP'}`);
@@ -340,13 +349,14 @@ export class OpenAIRealtimeSession {
 
         case 'mark_do_not_call': {
           if (this.customerId || this.customer?.id) {
-            await customerRepository.update(this.customerId || this.customer?.id, {
-              status: 'DO_NOT_CALL',
-            });
+            await customerRepository.updateStatus(
+              this.customerId || this.customer?.id,
+              CUSTOMER_STATUS.DO_NOT_CALL
+            );
           }
           if (this.callId) {
             await callRepository.update(this.callId, {
-              outcome: 'DO_NOT_CALL',
+              outcome: CALL_OUTCOME.DO_NOT_CALL,
             });
           }
           await this.logMessage('SYSTEM', 'Customer marked as DO_NOT_CALL (Opt-Out)');
@@ -357,14 +367,14 @@ export class OpenAIRealtimeSession {
         case 'end_call': {
           if (this.callId) {
             await callRepository.update(this.callId, {
-              outcome: args.outcome || 'NO_ISSUE',
-              status: 'COMPLETED',
+              outcome: args.outcome || CALL_OUTCOME.NO_ISSUE,
+              status: CALL_STATUS.COMPLETED,
               endedAt: new Date(),
             });
           }
           await this.logMessage(
             'SYSTEM',
-            `Call ended. Outcome: ${args.outcome || 'NO_ISSUE'}. Summary: ${args.summary || 'None'}`
+            `Call ended. Outcome: ${args.outcome || CALL_OUTCOME.NO_ISSUE}. Summary: ${args.summary || 'None'}`
           );
 
           if (this.twilioCallSid) {

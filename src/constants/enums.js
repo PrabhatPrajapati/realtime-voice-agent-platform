@@ -1,0 +1,80 @@
+/**
+ * Domain Enums & Constants
+ * Single source of truth for statuses, categories, and priorities across the system.
+ */
+
+export const CALL_STATUS = Object.freeze({
+  QUEUED: 'QUEUED',
+  DIALING: 'DIALING',
+  RINGING: 'RINGING',
+  ANSWERED: 'ANSWERED',
+  AI_CONNECTED: 'AI_CONNECTED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  TRANSFERRED: 'TRANSFERRED',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+});
+
+export const CALL_OUTCOME = Object.freeze({
+  NO_ISSUE: 'NO_ISSUE',
+  ISSUE_FOUND: 'ISSUE_FOUND',
+  HUMAN_REQUESTED: 'HUMAN_REQUESTED',
+  CALLBACK: 'CALLBACK',
+  NO_ANSWER: 'NO_ANSWER',
+  BUSY: 'BUSY',
+  VOICEMAIL: 'VOICEMAIL',
+  DO_NOT_CALL: 'DO_NOT_CALL',
+  FAILED: 'FAILED',
+  IN_PROGRESS: 'IN_PROGRESS',
+});
+
+export const CUSTOMER_STATUS = Object.freeze({
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  DO_NOT_CALL: 'DO_NOT_CALL',
+});
+
+export const CAMPAIGN_STATUS = Object.freeze({
+  DRAFT: 'DRAFT',
+  RUNNING: 'RUNNING',
+  PAUSED: 'PAUSED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+});
+
+export const CAMPAIGN_CUSTOMER_STATUS = Object.freeze({
+  PENDING: 'PENDING',
+  QUEUED: 'QUEUED',
+  CALLING: 'CALLING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  NO_ANSWER: 'NO_ANSWER',
+  BUSY: 'BUSY',
+  VOICEMAIL: 'VOICEMAIL',
+  CALLBACK: 'CALLBACK',
+  DO_NOT_CALL: 'DO_NOT_CALL',
+});
+
+export const ISSUE_STATUS = Object.freeze({
+  OPEN: 'OPEN',
+  IN_PROGRESS: 'IN_PROGRESS',
+  RESOLVED: 'RESOLVED',
+  CLOSED: 'CLOSED',
+});
+
+export const ISSUE_PRIORITY = Object.freeze({
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  URGENT: 'URGENT',
+});
+
+export const ISSUE_CATEGORY = Object.freeze({
+  LOGIN: 'LOGIN',
+  PAYMENT: 'PAYMENT',
+  ACCOUNT: 'ACCOUNT',
+  TECHNICAL: 'TECHNICAL',
+  PERFORMANCE: 'PERFORMANCE',
+  ACCESS: 'ACCESS',
+  OTHER: 'OTHER',
+});

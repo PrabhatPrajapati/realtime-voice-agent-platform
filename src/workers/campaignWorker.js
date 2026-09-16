@@ -1,16 +1,19 @@
 import { Worker } from 'bullmq';
-import Redis from 'ioredis';
 import { env } from '../config/env.js';
 import { logger, createCallLogger } from '../config/logger.js';
+import { createRedisConnection } from '../config/redis.js';
 import { CAMPAIGN_QUEUE_NAME } from '../queues/campaignQueue.js';
 import { campaignRepository } from '../repositories/campaignRepository.js';
 import { customerRepository } from '../repositories/customerRepository.js';
 import { callRepository } from '../repositories/callRepository.js';
 import { twilioService } from '../services/twilioService.js';
-
-const redisConnection = new Redis(env.REDIS_URL, {
-  maxRetriesPerRequest: null,
-});
+import {
+  CALL_STATUS,
+  CALL_OUTCOME,
+  CUSTOMER_STATUS,
+  CAMPAIGN_STATUS,
+  CAMPAIGN_CUSTOMER_STATUS,
+} from '../constants/enums.js';
 
 export const campaignWorker = new Worker(
   CAMPAIGN_QUEUE_NAME,
@@ -26,7 +29,7 @@ export const campaignWorker = new Worker(
 
     // Step 1: Check Campaign Status
     const campaign = await campaignRepository.findById(campaignId);
-    if (!campaign || campaign.status === 'PAUSED' || campaign.status === 'CANCELLED') {
+    if (!campaign || campaign.status === CAMPAIGN_STATUS.PAUSED || campaign.status === CAMPAIGN_STATUS.CANCELLED) {
       workerLog.warn(
         { status: campaign?.status },
         'Skipping job: Campaign is paused, cancelled, or missing'
@@ -41,10 +44,10 @@ export const campaignWorker = new Worker(
       return { skipped: true, reason: 'Customer not found' };
     }
 
-    if (customer.status === 'DO_NOT_CALL') {
+    if (customer.status === CUSTOMER_STATUS.DO_NOT_CALL) {
       workerLog.info('Skipping call: Customer is registered on DO_NOT_CALL list');
       await campaignRepository.updateCampaignCustomer(campaignId, customerId, {
-        status: 'DO_NOT_CALL',
+        status: CAMPAIGN_CUSTOMER_STATUS.DO_NOT_CALL,
         lastAttemptAt: new Date(),
       });
       await campaignRepository.incrementCompletedCalls(campaignId);
@@ -53,7 +56,7 @@ export const campaignWorker = new Worker(
 
     // Step 3: Update Campaign Customer status to CALLING
     await campaignRepository.updateCampaignCustomer(campaignId, customerId, {
-      status: 'CALLING',
+      status: CAMPAIGN_CUSTOMER_STATUS.CALLING,
       attemptCount: { increment: 1 },
       lastAttemptAt: new Date(),
     });
@@ -62,8 +65,8 @@ export const campaignWorker = new Worker(
     const call = await callRepository.create({
       customerId: customer.id,
       campaignId: campaign.id,
-      status: 'QUEUED',
-      outcome: 'IN_PROGRESS',
+      status: CALL_STATUS.QUEUED,
+      outcome: CALL_OUTCOME.IN_PROGRESS,
       startedAt: new Date(),
     });
 
@@ -85,11 +88,11 @@ export const campaignWorker = new Worker(
 
       await callRepository.update(call.id, {
         twilioCallSid: twilioResult.callSid,
-        status: 'DIALING',
+        status: CALL_STATUS.DIALING,
       });
 
       await campaignRepository.updateCampaignCustomer(campaignId, customerId, {
-        status: 'CALLING',
+        status: CAMPAIGN_CUSTOMER_STATUS.CALLING,
       });
 
       callLog.info({ callSid: twilioResult.callSid }, 'Campaign call successfully dialed');
@@ -98,13 +101,13 @@ export const campaignWorker = new Worker(
       callLog.error({ err: err.message }, 'Failed to place campaign call');
 
       await callRepository.update(call.id, {
-        status: 'FAILED',
-        outcome: 'FAILED',
+        status: CALL_STATUS.FAILED,
+        outcome: CALL_OUTCOME.FAILED,
         endedAt: new Date(),
       });
 
       await campaignRepository.updateCampaignCustomer(campaignId, customerId, {
-        status: 'FAILED',
+        status: CAMPAIGN_CUSTOMER_STATUS.FAILED,
       });
 
       await campaignRepository.incrementCompletedCalls(campaignId);
@@ -112,7 +115,7 @@ export const campaignWorker = new Worker(
     }
   },
   {
-    connection: redisConnection,
+    connection: createRedisConnection(),
     concurrency: env.MAX_CONCURRENT_CALLS || 5,
     limiter: {
       max: env.CALLS_PER_MINUTE || 20,

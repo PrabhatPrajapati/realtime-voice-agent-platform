@@ -1,4 +1,6 @@
 import { prisma } from '../utils/prisma.js';
+import { getPaginationParams, formatPaginatedResult } from '../utils/pagination.js';
+import { CALL_STATUS, CALL_OUTCOME } from '../constants/enums.js';
 
 export class CallRepository {
   /**
@@ -11,8 +13,8 @@ export class CallRepository {
         customerId: data.customerId,
         campaignId: data.campaignId,
         twilioCallSid: data.twilioCallSid,
-        status: data.status || 'QUEUED',
-        outcome: data.outcome || 'IN_PROGRESS',
+        status: data.status || CALL_STATUS.QUEUED,
+        outcome: data.outcome || CALL_OUTCOME.IN_PROGRESS,
         startedAt: data.startedAt || new Date(),
       },
       include: {
@@ -106,8 +108,9 @@ export class CallRepository {
    * List calls with pagination and filtering
    * @param {Object} params
    */
-  async findMany({ page = 1, limit = 20, status, outcome, campaignId, customerId }) {
-    const skip = (page - 1) * limit;
+  async findMany({ page, limit, status, outcome, campaignId, customerId } = {}) {
+    const { page: p, limit: l, skip, take } = getPaginationParams({ page, limit });
+
     const where = {
       ...(status ? { status } : {}),
       ...(outcome ? { outcome } : {}),
@@ -119,7 +122,7 @@ export class CallRepository {
       prisma.call.findMany({
         where,
         skip,
-        take: limit,
+        take,
         orderBy: { createdAt: 'desc' },
         include: {
           customer: {
@@ -140,16 +143,10 @@ export class CallRepository {
           },
         },
       }),
-      prisma.count ? prisma.call.count({ where }) : prisma.call.count({ where }),
+      prisma.call.count({ where }),
     ]);
 
-    return {
-      items,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+    return formatPaginatedResult({ items, total, page: p, limit: l });
   }
 }
 

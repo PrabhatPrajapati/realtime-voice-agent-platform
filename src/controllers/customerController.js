@@ -1,54 +1,27 @@
 import { customerService } from '../services/customerService.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { ApiResponse } from '../utils/apiResponse.js';
 
 export class CustomerController {
-  async createCustomer(req, res, next) {
-    try {
-      const customer = await customerService.createOrUpdateCustomer(req.body);
-      res.status(201).json({
-        success: true,
-        data: customer,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+  createCustomer = asyncHandler(async (req, res) => {
+    const customer = await customerService.createOrUpdateCustomer(req.body);
+    return ApiResponse.created(res, customer);
+  });
 
-  async getCustomer(req, res, next) {
-    try {
-      const customer = await customerService.getCustomerById(req.params.id);
-      res.json({
-        success: true,
-        data: customer,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+  getCustomer = asyncHandler(async (req, res) => {
+    const customer = await customerService.getCustomerById(req.params.id);
+    return ApiResponse.success(res, customer);
+  });
 
-  async listCustomers(req, res, next) {
-    try {
-      const result = await customerService.listCustomers(req.query);
-      res.json({
-        success: true,
-        ...result,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+  listCustomers = asyncHandler(async (req, res) => {
+    const result = await customerService.listCustomers(req.query);
+    return ApiResponse.paginated(res, result);
+  });
 
-  async setDoNotCall(req, res, next) {
-    try {
-      const customer = await customerService.setDoNotCall(req.params.id);
-      res.json({
-        success: true,
-        data: customer,
-        message: 'Customer status updated to DO_NOT_CALL',
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+  setDoNotCall = asyncHandler(async (req, res) => {
+    const customer = await customerService.setDoNotCall(req.params.id);
+    return ApiResponse.success(res, customer, 'Customer status updated to DO_NOT_CALL');
+  });
 }
 
 export const customerController = new CustomerController();
