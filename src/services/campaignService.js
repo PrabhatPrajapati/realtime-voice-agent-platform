@@ -1,6 +1,8 @@
 import { campaignRepository } from '../repositories/campaignRepository.js';
 import { campaignQueue } from '../queues/campaignQueue.js';
+import { prisma } from '../utils/prisma.js';
 import { logger } from '../config/logger.js';
+import { CAMPAIGN_STATUS, CAMPAIGN_CUSTOMER_STATUS } from '../constants/enums.js';
 
 export class CampaignService {
   /**
@@ -32,39 +34,52 @@ export class CampaignService {
   }
 
   /**
-   * Start or Run a campaign: Enqueues jobs for pending customers into BullMQ
+   * Start or Run a campaign: Enqueues jobs in bulk into BullMQ (O(1) batch operation)
    */
   async startCampaign(id) {
     const campaign = await this.getCampaignById(id);
 
-    if (campaign.status === 'RUNNING') {
+    if (campaign.status === CAMPAIGN_STATUS.RUNNING) {
       return campaign;
     }
 
-    logger.info({ campaignId: id }, 'Starting campaign and queuing customer jobs');
+    logger.info({ campaignId: id }, 'Starting campaign and batch-enqueuing customer jobs');
 
     // Update status to RUNNING
-    await campaignRepository.update(id, { status: 'RUNNING' });
+    await campaignRepository.update(id, { status: CAMPAIGN_STATUS.RUNNING });
 
-    // Enqueue jobs for all PENDING customers
+    // Filter pending/failed customers
     const pendingCustomers = campaign.campaignCustomers.filter(
-      (cc) => cc.status === 'PENDING' || cc.status === 'FAILED'
+      (cc) =>
+        cc.status === CAMPAIGN_CUSTOMER_STATUS.PENDING ||
+        cc.status === CAMPAIGN_CUSTOMER_STATUS.FAILED
     );
 
-    for (const cc of pendingCustomers) {
-      await campaignQueue.add(
-        `campaign-${id}-customer-${cc.customerId}`,
-        {
+    if (pendingCustomers.length > 0) {
+      // 1. Prepare bulk job definitions for single-roundtrip BullMQ dispatch
+      const bulkJobs = pendingCustomers.map((cc) => ({
+        name: `campaign-${id}-customer-${cc.customerId}`,
+        data: {
           campaignId: id,
           customerId: cc.customerId,
         },
-        {
+        opts: {
           jobId: `job-${id}-${cc.customerId}-${Date.now()}`,
-        }
-      );
+        },
+      }));
 
-      await campaignRepository.updateCampaignCustomer(id, cc.customerId, {
-        status: 'QUEUED',
+      await campaignQueue.addBulk(bulkJobs);
+
+      // 2. Batch update customer campaign status to QUEUED
+      const targetCustomerIds = pendingCustomers.map((c) => c.customerId);
+      await prisma.campaignCustomer.updateMany({
+        where: {
+          campaignId: id,
+          customerId: { in: targetCustomerIds },
+        },
+        data: {
+          status: CAMPAIGN_CUSTOMER_STATUS.QUEUED,
+        },
       });
     }
 
@@ -77,7 +92,7 @@ export class CampaignService {
   async pauseCampaign(id) {
     await this.getCampaignById(id);
     logger.info({ campaignId: id }, 'Pausing campaign');
-    return campaignRepository.update(id, { status: 'PAUSED' });
+    return campaignRepository.update(id, { status: CAMPAIGN_STATUS.PAUSED });
   }
 
   /**
@@ -93,7 +108,7 @@ export class CampaignService {
   async cancelCampaign(id) {
     await this.getCampaignById(id);
     logger.info({ campaignId: id }, 'Cancelling campaign');
-    return campaignRepository.update(id, { status: 'CANCELLED' });
+    return campaignRepository.update(id, { status: CAMPAIGN_STATUS.CANCELLED });
   }
 }
 

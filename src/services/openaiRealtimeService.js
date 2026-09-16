@@ -244,19 +244,23 @@ export class OpenAIRealtimeSession {
           break;
 
         case 'conversation.item.input_audio_transcription.completed':
-          // Customer speech transcription completed
+          // Customer speech transcription completed (logged asynchronously without blocking audio loop)
           if (event.transcript) {
             this.callLog.info({ transcript: event.transcript }, 'Customer spoke');
-            await this.logMessage('CUSTOMER', event.transcript);
+            this.logMessage('CUSTOMER', event.transcript).catch((err) =>
+              this.callLog.error({ err: err.message }, 'Failed to persist customer transcript')
+            );
           }
           break;
 
         case 'response.output_audio_transcript.done':
         case 'response.audio_transcript.done':
-          // AI speech completed
+          // AI speech completed (logged asynchronously without blocking audio loop)
           if (event.transcript) {
             this.callLog.info({ transcript: event.transcript }, 'AI spoke');
-            await this.logMessage('AI', event.transcript);
+            this.logMessage('AI', event.transcript).catch((err) =>
+              this.callLog.error({ err: err.message }, 'Failed to persist AI transcript')
+            );
           }
           break;
 

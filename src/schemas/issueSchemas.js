@@ -15,10 +15,10 @@ export const issuePriorityEnum = z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']);
 export const issueStatusEnum = z.enum(['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']);
 
 export const createIssueSchema = z.object({
-  callId: z.string().optional(),
-  customerId: z.string().min(1, 'Customer ID is required'),
-  assignedCsrId: z.string().optional(),
-  summary: z.string().min(3, 'Summary must be at least 3 characters'),
+  callId: z.string().trim().max(100).optional(),
+  customerId: z.string().trim().min(1, 'Customer ID is required').max(100),
+  assignedCsrId: z.string().trim().max(100).optional(),
+  summary: z.string().trim().min(3, 'Summary must be at least 3 characters').max(1000),
   category: issueCategoryEnum.default('OTHER'),
   priority: issuePriorityEnum.default('MEDIUM'),
   status: issueStatusEnum.default('OPEN'),
@@ -32,9 +32,9 @@ export const issueQuerySchema = z.object({
   status: issueStatusEnum.optional(),
   priority: issuePriorityEnum.optional(),
   category: issueCategoryEnum.optional(),
-  customerId: z.string().optional(),
+  customerId: z.string().trim().max(100).optional(),
 });
 
 export const resolveIssueSchema = z.object({
-  notes: z.string().optional(),
+  notes: z.string().trim().max(2000).optional(),
 });
