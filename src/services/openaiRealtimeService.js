@@ -139,34 +139,28 @@ export class OpenAIRealtimeSession {
       assignedCsrId: this.customer?.assignedCsrId || 'CSR-001',
     });
 
-    // Configure session with audio/pcmu (G.711 u-law) format directly for Twilio Media Stream
+    // Configure session with proper OpenAI Realtime API parameters & G.711 u-law format for Twilio
     const sessionUpdate = {
       type: 'session.update',
       session: {
-        type: 'realtime',
+        modalities: ['text', 'audio'],
         instructions,
-        audio: {
-          input: {
-            format: { type: 'audio/pcmu' },
-            transcription: {
-              model: 'whisper-1',
-            },
-            turn_detection: {
-              type: 'server_vad',
-              threshold: 0.5,
-              prefix_padding_ms: 300,
-              silence_duration_ms: 500,
-              create_response: true,
-              interrupt_response: true,
-            },
-          },
-          output: {
-            format: { type: 'audio/pcmu' },
-            voice: env.OPENAI_VOICE || 'alloy',
-          },
+        voice: env.OPENAI_VOICE || 'alloy',
+        input_audio_format: 'g711_ulaw',
+        output_audio_format: 'g711_ulaw',
+        input_audio_transcription: {
+          model: 'whisper-1',
+        },
+        turn_detection: {
+          type: 'server_vad',
+          threshold: 0.6,
+          prefix_padding_ms: 300,
+          silence_duration_ms: 900,
+          create_response: true,
         },
         tools: realtimeTools,
         tool_choice: 'auto',
+        temperature: 0.7,
       },
     };
 
@@ -383,8 +377,12 @@ export class OpenAIRealtimeSession {
 
           if (this.twilioCallSid) {
             setTimeout(async () => {
-              await twilioService.hangupCall(this.twilioCallSid);
-            }, 1500);
+              try {
+                await twilioService.hangupCall(this.twilioCallSid);
+              } catch (err) {
+                this.callLog.warn({ err: err.message }, 'Call was already hung up');
+              }
+            }, 4500);
           }
           result = { success: true, message: 'Call concluded' };
           break;

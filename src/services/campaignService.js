@@ -56,8 +56,9 @@ export class CampaignService {
     );
 
     if (pendingCustomers.length > 0) {
-      // 1. Prepare bulk job definitions for single-roundtrip BullMQ dispatch
-      const bulkJobs = pendingCustomers.map((cc) => ({
+      // 1. Prepare bulk job definitions with rate pacing delay
+      const intervalMs = Math.max(1000, Math.floor(60000 / (env.CALLS_PER_MINUTE || 10)));
+      const bulkJobs = pendingCustomers.map((cc, index) => ({
         name: `campaign-${id}-customer-${cc.customerId}`,
         data: {
           campaignId: id,
@@ -65,6 +66,7 @@ export class CampaignService {
         },
         opts: {
           jobId: `job-${id}-${cc.customerId}-${Date.now()}`,
+          delay: index * intervalMs,
         },
       }));
 
