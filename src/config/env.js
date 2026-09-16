@@ -5,55 +5,51 @@ import { z } from 'zod';
 dotenv.config();
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().default(3000),
-  HOST: z.string().default('0.0.0.0'),
-  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  NODE_ENV: z.enum(['development', 'test', 'production']),
+  PORT: z.coerce.number(),
+  HOST: z.string(),
+  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']),
 
   // Database & Cache
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
-  REDIS_URL: z.string().default('redis://localhost:6379'),
+  REDIS_URL: z.string().min(1, 'REDIS_URL is required'),
 
   // Twilio Settings
-  TWILIO_ACCOUNT_SID: z.string().default('ACmock_account_sid_for_development'),
-  TWILIO_AUTH_TOKEN: z.string().default('mock_auth_token_for_development'),
-  TWILIO_PHONE_NUMBER: z.string().default('+15551234567'),
+  TWILIO_ACCOUNT_SID: z.string().min(1, 'TWILIO_ACCOUNT_SID is required'),
+  TWILIO_AUTH_TOKEN: z.string().min(1, 'TWILIO_AUTH_TOKEN is required'),
+  TWILIO_PHONE_NUMBER: z.string().min(1, 'TWILIO_PHONE_NUMBER is required'),
   TWILIO_VALIDATE_WEBHOOK: z
     .string()
-    .transform((val) => val === 'true')
-    .default('false'),
+    .transform((val) => val === 'true'),
 
   // Networking / Public Base URL
-  PUBLIC_BASE_URL: z.string().default('http://localhost:3000'),
+  PUBLIC_BASE_URL: z.string().min(1, 'PUBLIC_BASE_URL is required'),
 
   // OpenAI Settings
-  OPENAI_API_KEY: z.string().default('sk-mock-openai-api-key-for-development'),
-  OPENAI_MODEL: z.string().default('gpt-realtime'),
-  OPENAI_VOICE: z.string().default('alloy'),
+  OPENAI_API_KEY: z.string().min(1, 'OPENAI_API_KEY is required'),
+  OPENAI_MODEL: z.string().min(1, 'OPENAI_MODEL is required'),
+  OPENAI_VOICE: z.string().min(1, 'OPENAI_VOICE is required'),
 
   // Queue & Rate Limiting
-  MAX_CONCURRENT_CALLS: z.coerce.number().default(5),
-  CALLS_PER_MINUTE: z.coerce.number().default(20),
+  MAX_CONCURRENT_CALLS: z.coerce.number().positive(),
+  CALLS_PER_MINUTE: z.coerce.number().positive(),
 
   // Call Business Rules
-  CSR_PHONE_NUMBER: z.string().default('+15559876543'),
-  COMPANY_NAME: z.string().default('ACME Support'),
+  CSR_PHONE_NUMBER: z.string().min(1, 'CSR_PHONE_NUMBER is required'),
+  COMPANY_NAME: z.string().min(1, 'COMPANY_NAME is required'),
   ENABLE_CALL_RECORDING: z
     .string()
-    .transform((val) => val === 'true')
-    .default('false'),
+    .transform((val) => val === 'true'),
   ENABLE_AMD: z
     .string()
-    .transform((val) => val === 'true')
-    .default('true'),
+    .transform((val) => val === 'true'),
 
   // Automated Weekly Check-In Scheduler
   ENABLE_WEEKLY_CHECKIN: z
     .string()
-    .transform((val) => val === 'true')
-    .default('true'),
-  WEEKLY_CHECKIN_DAY: z.string().default('MONDAY'),
-  WEEKLY_CHECKIN_TIME: z.string().default('10:00'),
+    .transform((val) => val === 'true'),
+  WEEKLY_CHECKIN_DAY: z.string().min(1, 'WEEKLY_CHECKIN_DAY is required'),
+  WEEKLY_CHECKIN_TIME: z.string().min(1, 'WEEKLY_CHECKIN_TIME is required'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

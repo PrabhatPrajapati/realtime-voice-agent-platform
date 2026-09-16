@@ -49,19 +49,32 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - HOST=0.0.0.0
+      - LOG_LEVEL=debug
       - DATABASE_URL=mongodb://mongodb:27017/ai_calling?replicaSet=rs0&directConnection=true
       - REDIS_URL=redis://redis:6379
       - PUBLIC_BASE_URL=${PUBLIC_BASE_URL}
       - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
       - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
       - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - TWILIO_VALIDATE_WEBHOOK=${TWILIO_VALIDATE_WEBHOOK:-false}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-realtime}
       - OPENAI_VOICE=${OPENAI_VOICE:-alloy}
+      - MAX_CONCURRENT_CALLS=${MAX_CONCURRENT_CALLS:-5}
+      - CALLS_PER_MINUTE=${CALLS_PER_MINUTE:-10}
+      - CSR_PHONE_NUMBER=${CSR_PHONE_NUMBER:-+15559876543}
+      - COMPANY_NAME=${COMPANY_NAME:-Zop Dealer}
+      - ENABLE_CALL_RECORDING=${ENABLE_CALL_RECORDING:-false}
       - ENABLE_AMD=${ENABLE_AMD:-false}
+      - ENABLE_WEEKLY_CHECKIN=${ENABLE_WEEKLY_CHECKIN:-true}
+      - WEEKLY_CHECKIN_DAY=${WEEKLY_CHECKIN_DAY:-MONDAY}
+      - WEEKLY_CHECKIN_TIME=${WEEKLY_CHECKIN_TIME:-10:00}
     volumes:
       - ./src:/app/src
       - ./public:/app/public
+      - ./.env:/app/.env
+
     env_file:
       - .env
     depends_on:
