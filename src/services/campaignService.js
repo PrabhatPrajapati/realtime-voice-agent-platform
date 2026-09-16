@@ -110,6 +110,15 @@ export class CampaignService {
     logger.info({ campaignId: id }, 'Cancelling campaign');
     return campaignRepository.update(id, { status: CAMPAIGN_STATUS.CANCELLED });
   }
+
+  /**
+   * Delete a campaign and its associations
+   */
+  async deleteCampaign(id) {
+    await this.getCampaignById(id);
+    logger.info({ campaignId: id }, 'Deleting campaign');
+    return campaignRepository.delete(id);
+  }
 }
 
 export const campaignService = new CampaignService();

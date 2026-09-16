@@ -33,4 +33,10 @@ router.post(
   customerController.setDoNotCall
 );
 
+router.delete(
+  '/:id',
+  validate({ params: customerIdParamSchema }),
+  customerController.deleteCustomer
+);
+
 export default router;

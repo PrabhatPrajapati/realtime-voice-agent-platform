@@ -98,6 +98,16 @@ export class CustomerRepository {
       data: { status },
     });
   }
+
+  /**
+   * Delete customer by ID
+   * @param {string} id
+   */
+  async delete(id) {
+    return prisma.customer.delete({
+      where: { id },
+    });
+  }
 }
 
 export const customerRepository = new CustomerRepository();

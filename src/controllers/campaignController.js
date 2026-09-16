@@ -51,6 +51,11 @@ export class CampaignController {
     const campaign = await campaignService.cancelCampaign(req.params.id);
     return ApiResponse.success(res, campaign);
   });
+
+  deleteCampaign = asyncHandler(async (req, res) => {
+    await campaignService.deleteCampaign(req.params.id);
+    return ApiResponse.success(res, null, 'Campaign deleted successfully');
+  });
 }
 
 export const campaignController = new CampaignController();

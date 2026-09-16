@@ -307,7 +307,7 @@ async function loadCampaigns() {
           <div class="progress-fill" style="width: ${c.progressPercent}%;"></div>
         </div>
 
-        <div style="display: flex; gap: 0.5rem; margin-top: auto; padding-top: 1rem;">
+        <div style="display: flex; gap: 0.5rem; margin-top: auto; padding-top: 1rem; flex-wrap: wrap;">
           ${
             c.status === 'DRAFT' || c.status === 'PAUSED'
               ? `<button class="btn btn-sm btn-primary" onclick="startCampaign('${c.id}')">▶ Start Dialing</button>`
@@ -320,6 +320,7 @@ async function loadCampaigns() {
               ? `<button class="btn btn-sm btn-secondary" onclick="cancelCampaign('${c.id}')">Cancel</button>`
               : ''
           }
+          <button class="btn btn-sm btn-danger" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" onclick="deleteCampaign('${c.id}', '${c.name.replace(/'/g, "\\'")}')">🗑️ Delete</button>
         </div>
       </div>
     `
@@ -357,6 +358,7 @@ async function loadAllCustomers() {
               ? `<button class="btn btn-sm btn-secondary" onclick="toggleDNC('${cust.id}')">Mark DNC</button>`
               : ''
           }
+          <button class="btn btn-sm btn-danger" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" onclick="deleteCustomer('${cust.id}', '${cust.name.replace(/'/g, "\\'")}')">🗑️ Delete</button>
         </td>
       </tr>
     `
@@ -576,6 +578,38 @@ async function pauseCampaign(id) {
     refreshCurrentTab();
   } catch (e) {
     alert(`Error: ${e.message}`);
+  }
+}
+
+async function deleteCustomer(customerId, name) {
+  if (confirm(`Are you sure you want to delete customer "${name}"? This will permanently remove them from the directory.`)) {
+    try {
+      const res = await fetch(`/api/customers/${customerId}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        refreshCurrentTab();
+      } else {
+        alert(`Failed to delete customer: ${json.error}`);
+      }
+    } catch (e) {
+      alert(`Error: ${e.message}`);
+    }
+  }
+}
+
+async function deleteCampaign(campaignId, name) {
+  if (confirm(`Are you sure you want to delete campaign "${name}"? This will permanently delete the campaign record.`)) {
+    try {
+      const res = await fetch(`/api/campaigns/${campaignId}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        refreshCurrentTab();
+      } else {
+        alert(`Failed to delete campaign: ${json.error}`);
+      }
+    } catch (e) {
+      alert(`Error: ${e.message}`);
+    }
   }
 }
 

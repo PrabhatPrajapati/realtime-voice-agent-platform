@@ -22,6 +22,11 @@ export class CustomerController {
     const customer = await customerService.setDoNotCall(req.params.id);
     return ApiResponse.success(res, customer, 'Customer status updated to DO_NOT_CALL');
   });
+
+  deleteCustomer = asyncHandler(async (req, res) => {
+    await customerService.deleteCustomer(req.params.id);
+    return ApiResponse.success(res, null, 'Customer deleted successfully');
+  });
 }
 
 export const customerController = new CustomerController();

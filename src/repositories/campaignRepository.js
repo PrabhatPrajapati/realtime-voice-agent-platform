@@ -131,6 +131,16 @@ export class CampaignRepository {
       },
     });
   }
+
+  /**
+   * Delete campaign by ID
+   * @param {string} id
+   */
+  async delete(id) {
+    return prisma.campaign.delete({
+      where: { id },
+    });
+  }
 }
 
 export const campaignRepository = new CampaignRepository();

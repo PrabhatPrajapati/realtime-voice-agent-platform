@@ -54,4 +54,10 @@ router.post(
   campaignController.cancelCampaign
 );
 
+router.delete(
+  '/:id',
+  validate({ params: campaignIdParamSchema }),
+  campaignController.deleteCampaign
+);
+
 export default router;

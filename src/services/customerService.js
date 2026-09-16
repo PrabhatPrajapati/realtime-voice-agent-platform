@@ -25,6 +25,12 @@ export class CustomerService {
     logger.info({ customerId: id }, 'Marking customer as DO_NOT_CALL');
     return customerRepository.updateStatus(id, CUSTOMER_STATUS.DO_NOT_CALL);
   }
+
+  async deleteCustomer(id) {
+    await this.getCustomerById(id);
+    logger.info({ customerId: id }, 'Deleting customer record');
+    return customerRepository.delete(id);
+  }
 }
 
 export const customerService = new CustomerService();
