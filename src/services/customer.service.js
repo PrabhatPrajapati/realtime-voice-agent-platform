@@ -1,0 +1,30 @@
+import { customerRepository } from '../repositories/customer.repository.js';
+import { logger } from '../config/logger.js';
+
+export class CustomerService {
+  async getCustomerById(id) {
+    const customer = await customerRepository.findById(id);
+    if (!customer) {
+      const error = new Error(`Customer with ID ${id} not found`);
+      error.statusCode = 404;
+      throw error;
+    }
+    return customer;
+  }
+
+  async createOrUpdateCustomer(data) {
+    return customerRepository.upsertByPhone(data);
+  }
+
+  async listCustomers(params) {
+    return customerRepository.findMany(params);
+  }
+
+  async setDoNotCall(id) {
+    logger.info({ customerId: id }, 'Marking customer as DO_NOT_CALL');
+    return customerRepository.updateStatus(id, 'DO_NOT_CALL');
+  }
+}
+
+export const customerService = new CustomerService();
+export default customerService;

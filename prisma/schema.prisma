@@ -1,0 +1,225 @@
+// Prisma Schema for AI Outbound Calling Agent (MongoDB)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------
+// ENUMS
+// ---------------------------------------------------------
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  DO_NOT_CALL
+}
+
+enum CampaignStatus {
+  DRAFT
+  RUNNING
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum CampaignCustomerStatus {
+  PENDING
+  QUEUED
+  CALLING
+  COMPLETED
+  FAILED
+  NO_ANSWER
+  BUSY
+  VOICEMAIL
+  CALLBACK
+  DO_NOT_CALL
+}
+
+enum CallStatus {
+  QUEUED
+  DIALING
+  RINGING
+  ANSWERED
+  AI_CONNECTED
+  IN_PROGRESS
+  TRANSFERRED
+  COMPLETED
+  FAILED
+}
+
+enum CallOutcome {
+  NO_ISSUE
+  ISSUE_FOUND
+  HUMAN_REQUESTED
+  CALLBACK
+  NO_ANSWER
+  BUSY
+  VOICEMAIL
+  FAILED
+  IN_PROGRESS
+}
+
+enum AmdResult {
+  HUMAN
+  MACHINE
+  UNKNOWN
+  NOT_APPLICABLE
+}
+
+enum IssueCategory {
+  LOGIN
+  PAYMENT
+  ACCOUNT
+  TECHNICAL
+  PERFORMANCE
+  ACCESS
+  OTHER
+}
+
+enum IssuePriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum MessageSpeaker {
+  AI
+  CUSTOMER
+  SYSTEM
+  CSR
+}
+
+// ---------------------------------------------------------
+// MODELS
+// ---------------------------------------------------------
+
+model Customer {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  phone         String         @unique
+  email         String?
+  assignedCsrId String?
+  status        CustomerStatus @default(ACTIVE)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  calls              Call[]
+  issues             Issue[]
+  campaignCustomers  CampaignCustomer[]
+
+  @@map("customers")
+}
+
+model Campaign {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  description    String?
+  status         CampaignStatus @default(DRAFT)
+  concurrency    Int            @default(5)
+  totalCustomers Int            @default(0)
+  completedCalls Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  calls              Call[]
+  campaignCustomers  CampaignCustomer[]
+
+  @@map("campaigns")
+}
+
+model CampaignCustomer {
+  id            String                 @id @default(auto()) @map("_id") @db.ObjectId
+  campaignId    String                 @db.ObjectId
+  customerId    String                 @db.ObjectId
+  status        CampaignCustomerStatus @default(PENDING)
+  attemptCount  Int                    @default(0)
+  lastAttemptAt DateTime?
+  nextAttemptAt DateTime?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, customerId])
+  @@index([status])
+  @@map("campaign_customers")
+}
+
+model Call {
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  customerId      String?     @db.ObjectId
+  campaignId      String?     @db.ObjectId
+  twilioCallSid   String?
+  twilioStreamSid String?
+  status          CallStatus  @default(QUEUED)
+  outcome         CallOutcome @default(IN_PROGRESS)
+  duration        Int?
+  amdResult       AmdResult   @default(NOT_APPLICABLE)
+  recordingSid    String?
+  recordingUrl    String?
+  startedAt       DateTime?
+  answeredAt      DateTime?
+  endedAt         DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  messages CallMessage[]
+  issues   Issue[]
+
+  @@index([twilioCallSid])
+  @@index([status])
+  @@index([outcome])
+  @@map("calls")
+}
+
+model Issue {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  callId        String?       @db.ObjectId
+  customerId    String        @db.ObjectId
+  assignedCsrId String?
+  summary       String
+  category      IssueCategory @default(OTHER)
+  priority      IssuePriority @default(MEDIUM)
+  status        IssueStatus   @default(OPEN)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  call     Call?    @relation(fields: [callId], references: [id], onDelete: SetNull)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([callId])
+  @@index([customerId])
+  @@index([status])
+  @@index([priority])
+  @@map("issues")
+}
+
+model CallMessage {
+  id        String         @id @default(auto()) @map("_id") @db.ObjectId
+  callId    String         @db.ObjectId
+  speaker   MessageSpeaker
+  text      String
+  timestamp DateTime       @default(now())
+
+  call Call @relation(fields: [callId], references: [id], onDelete: Cascade)
+
+  @@index([callId])
+  @@map("call_messages")
+}

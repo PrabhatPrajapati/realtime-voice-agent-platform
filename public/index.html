@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Outbound Calling Agent — Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path><path d="M14.05 2a9 9 0 0 1 8 7.94"></path><path d="M14.05 6A5 5 0 0 1 18 10"></path></svg>
+        </div>
+        <div class="brand-text">
+          <h2>Apex Voice AI</h2>
+          <span class="badge live-badge"><span class="dot"></span> Live Voice Engine</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <button class="nav-item active" data-tab="overview">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Overview
+        </button>
+        <button class="nav-item" data-tab="campaigns">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+          Campaigns
+        </button>
+        <button class="nav-item" data-tab="calls">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          Call Logs & Transcripts
+        </button>
+        <button class="nav-item" data-tab="issues">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          Issues & CSR Handoffs
+          <span class="badge count-badge" id="open-issues-count">0</span>
+        </button>
+        <button class="nav-item" data-tab="customers">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          Customers Directory
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-primary btn-block" onclick="openTestCallModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Quick Test Call
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="top-header">
+        <div>
+          <h1 id="page-title">Operational Overview</h1>
+          <p class="subtitle" id="page-subtitle">Real-time status of voice AI dialing, customer issues, and CSR handoffs</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" onclick="refreshCurrentTab()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+            Refresh
+          </button>
+          <button class="btn btn-primary" onclick="openTestCallModal()">
+            📞 Launch Call
+          </button>
+        </div>
+      </header>
+
+      <!-- TAB: OVERVIEW -->
+      <section id="tab-overview" class="tab-pane active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Total Customers</span>
+            <div class="stat-value" id="stat-total-customers">0</div>
+            <span class="stat-sub">Audience database</span>
+          </div>
+          <div class="stat-card highlight">
+            <span class="stat-label">Calls Today</span>
+            <div class="stat-value" id="stat-calls-today">0</div>
+            <span class="stat-sub">Outbound placed</span>
+          </div>
+          <div class="stat-card success">
+            <span class="stat-label">No Issue Found</span>
+            <div class="stat-value" id="stat-no-issue">0</div>
+            <span class="stat-sub">Happy customers</span>
+          </div>
+          <div class="stat-card warning">
+            <span class="stat-label">Issues Detected</span>
+            <div class="stat-value" id="stat-issues-found">0</div>
+            <span class="stat-sub">Logged in DB</span>
+          </div>
+          <div class="stat-card danger">
+            <span class="stat-label">CSR Transfers</span>
+            <div class="stat-value" id="stat-transfers">0</div>
+            <span class="stat-sub">Live handoffs</span>
+          </div>
+          <div class="stat-card info">
+            <span class="stat-label">Callbacks Scheduled</span>
+            <div class="stat-value" id="stat-callbacks">0</div>
+            <span class="stat-sub">Follow-up requested</span>
+          </div>
+        </div>
+
+        <div class="grid-2-col">
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Outbound Calls</h3>
+              <button class="btn btn-sm btn-ghost" onclick="switchTab('calls')">View All</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table" id="recent-calls-table">
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Outcome</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="5" class="text-muted text-center">Loading calls...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Structured Issues</h3>
+              <button class="btn btn-sm btn-ghost" onclick="switchTab('issues')">View All</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table" id="recent-issues-table">
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Summary</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="5" class="text-muted text-center">Loading issues...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: CAMPAIGNS -->
+      <section id="tab-campaigns" class="tab-pane">
+        <div class="card-header-bar">
+          <div>
+            <h3>Outbound Campaigns</h3>
+            <p class="subtitle">Bulk voice dialing with BullMQ concurrency & rate limiting</p>
+          </div>
+          <button class="btn btn-primary" onclick="openCreateCampaignModal()">+ Create Campaign</button>
+        </div>
+
+        <!-- Recurring Weekly Automation Banner -->
+        <div class="card weekly-automation-banner" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                <span style="font-size: 1.2rem;">📅</span>
+                <h4 style="margin: 0; font-size: 1.1rem; color: #fff;">Automated Weekly Customer Check-in</h4>
+                <span class="badge badge-success" id="weekly-status-badge">Active</span>
+              </div>
+              <p class="text-muted" style="margin: 0; font-size: 0.88rem;" id="weekly-schedule-desc">
+                Scheduled: Every <strong id="weekly-day-text">MONDAY</strong> at <strong id="weekly-time-text">10:00 AM</strong> • Automatic AI voice check-in for all ACTIVE customers
+              </p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <span style="font-size: 0.85rem; color: var(--text-muted);" id="weekly-audience-count">👥 0 Active Customers</span>
+              <button class="btn btn-primary" id="btn-trigger-weekly" onclick="triggerWeeklyCheckinNow()" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none;">
+                ⚡ Run Weekly Check-in Now
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="campaigns-grid" id="campaigns-list">
+          <!-- Campaign Cards injected here -->
+        </div>
+      </section>
+
+      <!-- TAB: CALLS -->
+      <section id="tab-calls" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h3>Complete Call Records & Transcripts</h3>
+            <span class="text-muted">Click any call to inspect conversation transcript</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="all-calls-table">
+              <thead>
+                <tr>
+                  <th>Call ID</th>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Twilio SID</th>
+                  <th>Status</th>
+                  <th>Outcome</th>
+                  <th>Duration</th>
+                  <th>Started At</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="all-calls-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: ISSUES -->
+      <section id="tab-issues" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h3>Discovered Issues & CSR Transfers</h3>
+            <span class="text-muted">Extracted automatically by OpenAI Realtime Voice Agent</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="all-issues-table">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Category</th>
+                  <th>Priority</th>
+                  <th>AI Summary</th>
+                  <th>Assigned CSR</th>
+                  <th>Status</th>
+                  <th>Discovered</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="all-issues-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: CUSTOMERS -->
+      <section id="tab-customers" class="tab-pane">
+        <div class="card-header-bar">
+          <div>
+            <h3>Customer Directory</h3>
+            <p class="subtitle">Manage customers, assigned CSRs, and Do-Not-Call compliance</p>
+          </div>
+          <button class="btn btn-primary" onclick="openCreateCustomerModal()">+ Add Customer</button>
+        </div>
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table" id="all-customers-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone Number</th>
+                  <th>Email</th>
+                  <th>Assigned CSR</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="all-customers-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: Test Call -->
+  <div class="modal" id="modal-test-call">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📞 Trigger Outbound Test Call</h3>
+        <button class="modal-close" onclick="closeModal('modal-test-call')">&times;</button>
+      </div>
+      <form id="form-test-call" onsubmit="submitTestCall(event)">
+        <div class="form-group">
+          <label>Customer Name</label>
+          <input type="text" id="tc-name" class="form-control" placeholder="e.g. Rahul Sharma" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Number (E.164 Format)</label>
+          <input type="text" id="tc-phone" class="form-control" placeholder="+919876543210" required>
+          <small class="text-muted">Must include country code (e.g. +91, +1)</small>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-test-call')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-call">Dial Now</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Call Transcript Detail -->
+  <div class="modal" id="modal-transcript">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3>🎙️ Call Details & Live Transcript</h3>
+        <button class="modal-close" onclick="closeModal('modal-transcript')">&times;</button>
+      </div>
+      <div id="transcript-modal-body">
+        <div class="call-summary-strip" id="transcript-summary-strip"></div>
+        <h4 style="margin: 1.5rem 0 0.5rem 0;">Conversation Transcript:</h4>
+        <div class="transcript-messages" id="transcript-chat-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Create Customer -->
+  <div class="modal" id="modal-customer">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>👤 Add New Customer</h3>
+        <button class="modal-close" onclick="closeModal('modal-customer')">&times;</button>
+      </div>
+      <form id="form-create-customer" onsubmit="submitCreateCustomer(event)">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="cust-name" class="form-control" placeholder="John Doe" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Number (E.164)</label>
+          <input type="text" id="cust-phone" class="form-control" placeholder="+1234567890" required>
+        </div>
+        <div class="form-group">
+          <label>Email (Optional)</label>
+          <input type="email" id="cust-email" class="form-control" placeholder="john@example.com">
+        </div>
+        <div class="form-group">
+          <label>Assigned CSR ID</label>
+          <input type="text" id="cust-csr" class="form-control" value="CSR-001" placeholder="CSR-001">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-customer')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Create Campaign -->
+  <div class="modal" id="modal-campaign">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📢 Create Outbound Calling Campaign</h3>
+        <button class="modal-close" onclick="closeModal('modal-campaign')">&times;</button>
+      </div>
+      <form id="form-create-campaign" onsubmit="submitCreateCampaign(event)">
+        <div class="form-group">
+          <label>Campaign Name</label>
+          <input type="text" id="camp-name" class="form-control" placeholder="e.g. Q3 Customer Satisfaction Check" required>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="camp-desc" class="form-control" placeholder="Checking in with recent active users">
+        </div>
+        <div class="form-group">
+          <label>Max Concurrency (Simultaneous Calls)</label>
+          <input type="number" id="camp-concurrency" class="form-control" value="5" min="1" max="20" required>
+        </div>
+        <div class="form-group">
+          <label>Select Customers To Call</label>
+          <div id="camp-customers-selection" class="customer-checkbox-list">
+            <span class="text-muted">Loading customers...</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-campaign')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Campaign</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
