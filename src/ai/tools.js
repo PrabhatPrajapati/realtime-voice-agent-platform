@@ -48,13 +48,13 @@ export const realtimeTools = [
     type: 'function',
     name: 'transfer_to_csr',
     description:
-      'Initiates an immediate live call transfer to the assigned human CSR support specialist.',
+      'Transfers the live call to the human CSR support specialist. ONLY invoke this tool AFTER the customer has explicitly confirmed they want to be transferred (e.g. said "yes", "please connect me", "transfer me") or directly requested a human. NEVER invoke this tool while asking the customer a question or before they confirm.',
     parameters: {
       type: 'object',
       properties: {
         reason: {
           type: 'string',
-          description: 'Brief reason for transfer (e.g. "Issue found", "Customer requested human").',
+          description: 'Brief reason for transfer (e.g. "Customer confirmed transfer", "Customer requested human").',
         },
         summary: {
           type: 'string',
