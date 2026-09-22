@@ -2,6 +2,7 @@ import { campaignRepository } from '../repositories/campaignRepository.js';
 import { campaignQueue } from '../queues/campaignQueue.js';
 import { prisma } from '../utils/prisma.js';
 import { logger } from '../config/logger.js';
+import { env } from '../config/env.js';
 import { CAMPAIGN_STATUS, CAMPAIGN_CUSTOMER_STATUS } from '../constants/enums.js';
 
 export class CampaignService {

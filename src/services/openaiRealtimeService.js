@@ -139,28 +139,38 @@ export class OpenAIRealtimeSession {
       assignedCsrId: this.customer?.assignedCsrId || 'CSR-001',
     });
 
-    // Configure session with proper OpenAI Realtime API parameters & G.711 u-law format for Twilio
+    // Configure session with verified gpt-realtime audio & VAD parameters for Twilio Media Stream
     const sessionUpdate = {
       type: 'session.update',
       session: {
-        modalities: ['text', 'audio'],
+        type: 'realtime',
         instructions,
-        voice: env.OPENAI_VOICE || 'alloy',
-        input_audio_format: 'g711_ulaw',
-        output_audio_format: 'g711_ulaw',
-        input_audio_transcription: {
-          model: 'whisper-1',
-        },
-        turn_detection: {
-          type: 'server_vad',
-          threshold: 0.6,
-          prefix_padding_ms: 300,
-          silence_duration_ms: 900,
-          create_response: true,
+        audio: {
+          input: {
+            format: {
+              type: 'audio/pcmu',
+            },
+            transcription: {
+              model: 'whisper-1',
+            },
+            turn_detection: {
+              type: 'server_vad',
+              threshold: 0.6,
+              prefix_padding_ms: 300,
+              silence_duration_ms: 900,
+              create_response: true,
+              interrupt_response: true,
+            },
+          },
+          output: {
+            format: {
+              type: 'audio/pcmu',
+            },
+            voice: env.OPENAI_VOICE || 'alloy',
+          },
         },
         tools: realtimeTools,
         tool_choice: 'auto',
-        temperature: 0.7,
       },
     };
 
