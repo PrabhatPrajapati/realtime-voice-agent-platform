@@ -51,6 +51,8 @@ export class OpenAIRealtimeSession {
 
     this.silenceTimer = null;
     this.silenceCount = 0;
+    this.lastCustomerSpeech = '';
+    this.lastAiSpeech = '';
   }
 
   /**
@@ -250,6 +252,7 @@ export class OpenAIRealtimeSession {
         case 'conversation.item.input_audio_transcription.completed':
           // Customer speech transcription completed (logged asynchronously without blocking audio loop)
           if (event.transcript) {
+            this.lastCustomerSpeech = event.transcript;
             this.callLog.info({ transcript: event.transcript }, 'Customer spoke');
             this.logMessage('CUSTOMER', event.transcript).catch((err) =>
               this.callLog.error({ err: err.message }, 'Failed to persist customer transcript')
@@ -261,6 +264,7 @@ export class OpenAIRealtimeSession {
         case 'response.audio_transcript.done':
           // AI speech completed (logged asynchronously without blocking audio loop)
           if (event.transcript) {
+            this.lastAiSpeech = event.transcript;
             this.callLog.info({ transcript: event.transcript }, 'AI spoke');
             this.logMessage('AI', event.transcript).catch((err) =>
               this.callLog.error({ err: err.message }, 'Failed to persist AI transcript')
@@ -321,7 +325,28 @@ export class OpenAIRealtimeSession {
         }
 
         case 'transfer_to_csr': {
-          this.callLog.info({ reason: args.reason }, 'Transferring call to CSR');
+          const positiveKeywords = [
+            'yes', 'yeah', 'yep', 'sure', 'ok', 'okay', 'connect', 'transfer',
+            'human', 'agent', 'person', 'specialist', 'rep', 'representative',
+            'please', 'haan', 'ha', 'correct', 'right', 'talk to someone'
+          ];
+          const customerSpoke = (this.lastCustomerSpeech || '').toLowerCase();
+          const hasCustomerConsent = positiveKeywords.some((w) => customerSpoke.includes(w));
+
+          // Guard: If AI invoked transfer while asking question and customer hasn't responded yes, block transfer!
+          if (!hasCustomerConsent) {
+            this.callLog.warn(
+              { lastCustomerSpeech: this.lastCustomerSpeech },
+              'Blocked premature transfer_to_csr: Customer has not responded with consent yet'
+            );
+            result = {
+              success: false,
+              message: 'Transfer aborted. You must wait for the customer to explicitly say yes or ask for a specialist before calling this tool.',
+            };
+            break;
+          }
+
+          this.callLog.info({ reason: args.reason }, 'Customer consented. Transferring call to CSR');
           await this.logMessage('SYSTEM', `Transferring call to CSR. Reason: ${args.reason}`);
 
           // Update call status
