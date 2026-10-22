@@ -5,7 +5,7 @@
  */
 
 export const buildSystemPrompt = ({
-  companyName = 'Zop Dealer',
+  companyName = 'Google',
   customerName = 'Valued Customer',
   customerPhone = '',
   assignedCsrId = 'CSR-001',

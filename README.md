@@ -1,4 +1,4 @@
-# 🤖 AI Outbound Calling Platform (Zop Dealer)
+# 🤖 AI Outbound Calling Platform (Google)
 
 A production-grade, modular AI outbound calling platform built with **Node.js**, **Express**, **Twilio Voice & Media Streams**, **OpenAI Realtime API (`gpt-realtime`)**, **MongoDB (Prisma ORM)**, **Redis**, **BullMQ**, and **WebSockets**.
 
@@ -19,7 +19,7 @@ Customer Phone <──Twilio Voice──> Twilio Media Streams (WebSocket wss://
 2. **Answer & Stream** → Twilio connects via WebSocket to `/media-stream`.
 3. **OpenAI Realtime Session** → Connects to `wss://api.openai.com/v1/realtime?model=gpt-realtime` using `audio/pcmu` (G.711 u-law).
 4. **Natural Conversation**:
-   - **Initial Greeting**: Sarah introduces herself from Zop Dealer.
+   - **Initial Greeting**: Sarah introduces herself from Google.
    - **Barge-in / Interruption Handling**: If customer speaks, AI stops speaking instantly and listens.
    - **Structured Issue Logging**: AI automatically calls function `create_issue` to extract summary, category, priority, and saves to MongoDB.
    - **CSR Live Handoff**: If customer requests human or has complex issue, AI executes `transfer_to_csr`.
