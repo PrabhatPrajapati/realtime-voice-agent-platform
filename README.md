@@ -61,8 +61,8 @@ Visit **[http://localhost:3000](http://localhost:3000)** to view live metrics, c
 - `POST /api/calls/test` - Trigger instant outbound test call:
   ```json
   {
-    "name": "Prabhat Kumar",
-    "phone": "+919818149932"
+    "name": "Gopal Kumar",
+    "phone": "+919876543212"
   }
   ```
 - `GET /api/calls` - List call records with transcripts and outcomes
